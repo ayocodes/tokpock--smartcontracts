@@ -1,0 +1,58 @@
+{
+    "name": "Tokpock",
+    "methods": [
+        {
+            "name": "init_wallet",
+            "args": [
+                {
+                    "type": "pay",
+                    "name": "payment"
+                },
+                {
+                    "type": "address",
+                    "name": "manager"
+                },
+                {
+                    "type": "string",
+                    "name": "account_name"
+                },
+                {
+                    "type": "byte[32]",
+                    "name": "password_hash"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_manager",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "new_manager"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "claim_funds",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "password"
+                },
+                {
+                    "type": "account",
+                    "name": "account"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        }
+    ],
+    "networks": {}
+}

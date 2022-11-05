@@ -1,0 +1,230 @@
+#pragma version 7
+intcblock 0 1
+bytecblock 0x6d616e61676572 0x 0x70617373776f72645f68617368 0x636f6e74726163745f66616d696c79 0x6163636f756e745f6e616d65 0x6d6963726f5f616c676f735f616d74
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l8
+txna ApplicationArgs 0
+pushbytes 0xe4f8546d // "init_wallet(pay,address,string,byte[32])void"
+==
+bnz main_l7
+txna ApplicationArgs 0
+pushbytes 0x9667d6de // "set_manager(address)void"
+==
+bnz main_l6
+txna ApplicationArgs 0
+pushbytes 0xb89ce9be // "claim_funds(string,account)void"
+==
+bnz main_l5
+err
+main_l5:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+store 6
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+store 7
+load 6
+load 7
+callsub claimfunds_7
+intc_1 // 1
+return
+main_l6:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+callsub setmanager_6
+intc_1 // 1
+return
+main_l7:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+store 3
+txna ApplicationArgs 2
+store 4
+txna ApplicationArgs 3
+store 5
+txn GroupIndex
+intc_1 // 1
+-
+store 2
+load 2
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
+load 2
+load 3
+load 4
+load 5
+callsub initwallet_5
+intc_1 // 1
+return
+main_l8:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l10
+err
+main_l10:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+callsub create_0
+intc_1 // 1
+return
+
+// create
+create_0:
+intc_0 // 0
+bytec_3 // "contract_family"
+app_global_get_ex
+store 1
+store 0
+load 1
+!
+assert
+bytec_3 // "contract_family"
+pushbytes 0x546f6b706f636b2d616c676f20312e302e30 // "Tokpock-algo 1.0.0"
+app_global_put
+bytec_0 // "manager"
+bytec_1 // ""
+app_global_put
+bytec 4 // "account_name"
+bytec_1 // ""
+app_global_put
+bytec_2 // "password_hash"
+bytec_1 // ""
+app_global_put
+bytec 5 // "micro_algos_amt"
+intc_0 // 0
+app_global_put
+pushbytes 0x756e6b6e6f776e5f63616c6c73 // "unknown_calls"
+intc_0 // 0
+app_global_put
+retsub
+
+// auth_only
+authonly_1:
+global CreatorAddress
+==
+retsub
+
+// auth_only
+authonly_2:
+global CreatorAddress
+==
+retsub
+
+// auth_only
+authonly_3:
+bytec_0 // "manager"
+app_global_get
+==
+retsub
+
+// pay
+pay_4:
+store 15
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+load 15
+itxn_field CloseRemainderTo
+load 15
+itxn_field Receiver
+itxn_submit
+retsub
+
+// init_wallet
+initwallet_5:
+store 11
+store 10
+store 9
+store 8
+txn Sender
+callsub authonly_1
+// unauthorized
+assert
+load 8
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+load 8
+gtxns Amount
+pushint 200000 // 200000
+>
+assert
+bytec_0 // "manager"
+load 9
+app_global_put
+bytec_2 // "password_hash"
+load 11
+app_global_put
+bytec 4 // "account_name"
+load 10
+extract 2 0
+app_global_put
+bytec 5 // "micro_algos_amt"
+load 8
+gtxns Amount
+global MinTxnFee
+-
+app_global_put
+retsub
+
+// set_manager
+setmanager_6:
+store 12
+txn Sender
+callsub authonly_2
+// unauthorized
+assert
+bytec_0 // "manager"
+load 12
+app_global_put
+retsub
+
+// claim_funds
+claimfunds_7:
+store 14
+store 13
+txn Sender
+callsub authonly_3
+// unauthorized
+assert
+bytec_2 // "password_hash"
+app_global_get
+load 13
+extract 2 0
+sha512_256
+==
+assert
+load 14
+txnas Accounts
+callsub pay_4
+retsub
